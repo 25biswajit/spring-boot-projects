@@ -1,3 +1,6 @@
+### CRUD Service - Java Project - Spring Boot + JPA + MySql + Docker
+### MySql & Spring Boot images are built and they are running in separate container
+
 ### Show running Docker Containers
 docker container ps / docker container ls
 
