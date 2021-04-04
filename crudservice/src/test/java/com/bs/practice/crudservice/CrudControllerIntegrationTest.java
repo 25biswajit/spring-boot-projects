@@ -58,30 +58,69 @@ public class CrudControllerIntegrationTest {
 	
 	@Test
 	@Order(1)
-    public void testCreateUser() {
-        User userNew = new User();
-        userNew.setName("Dummy");
-        userNew.setAge(25);
-        userNew.setSalary(20000);
-        userNew.setAddress("DuumyLocation");
+    public void testCRUDOperationOnUser() {
+		// New User
+		User userNew = createDummyUser();
+				
+        // New User Created	
+        Integer newUserId = createNewUser(userNew);
         
-        HttpEntity<User> requestInsert = new HttpEntity<User>(userNew, getHeaders());
-        
-        ResponseEntity<Integer> postResponse = restTemplate.postForEntity(getRootUrl() + "/users", 
-        		requestInsert,
-        		Integer.class);
-        assertEquals(HttpStatus.CREATED, postResponse.getStatusCode());
-        assertNotNull(postResponse.getBody());
-        
-        Integer newUserId = postResponse.getBody();
+        // Fetch User By User Id
         User userFetched = getUserById(newUserId);
+        
         assertEquals(userFetched.getName(), userNew.getName());
         assertEquals(userFetched.getAddress(), userNew.getAddress());
         assertEquals(userFetched.getAge(), userNew.getAge());
         assertEquals(userFetched.getSalary(), userNew.getSalary());
         
+        // Update User
+        updateUser(userFetched);
+        
+        // Fetch All User
+        testGetAllUsers();
+        
+        // Delete User
         deleteUser(newUserId, HttpStatus.OK);
     }
+	
+	private User createDummyUser() {
+		User userNew = new User();
+        userNew.setName("Dummy");
+        userNew.setAge(25);
+        userNew.setSalary(20000);
+        userNew.setAddress("DuumyLocation");
+		return userNew;
+	}
+
+	private Integer createNewUser(User userNew) {
+		HttpEntity<User> requestInsert = new HttpEntity<User>(userNew, getHeaders());
+        ResponseEntity<Integer> postResponse = restTemplate.postForEntity(getRootUrl() + "/users", 
+        		requestInsert,
+        		Integer.class);
+        assertEquals(HttpStatus.CREATED, postResponse.getStatusCode());
+        assertNotNull(postResponse.getBody());
+        System.out.println("USER Successfully CREATED:" + userNew);
+        
+        return postResponse.getBody();		
+	}
+
+	public void updateUser(User userToBeUpdated) {
+		userToBeUpdated.setSalary(userToBeUpdated.getSalary() + 500);
+    	
+    	HttpEntity<User> requestUpdate = new HttpEntity<User>(userToBeUpdated, getHeaders());
+    	UriComponents uri =UriComponentsBuilder.fromHttpUrl(getRootUrl() + "/users").build();
+    	
+    	ResponseEntity<String> putResponse = restTemplate.exchange(uri.toString(), 
+    			HttpMethod.PUT, 
+    			requestUpdate,
+				String.class);
+    	
+    	assertEquals(HttpStatus.OK, putResponse.getStatusCode());
+        assertNotNull(putResponse.getBody());
+        assertEquals("User with id : "+userToBeUpdated.getId()+" updated successfully", putResponse.getBody());
+        
+        System.out.println("User with id : "+userToBeUpdated.getId()+" updated successfully");
+	}
 	
     public User getUserById(Integer id) {
     	assertNotNull(id);
@@ -96,38 +135,18 @@ public class CrudControllerIntegrationTest {
     			User.class);
     	
     	assertEquals(HttpStatus.OK, userResponse.getStatusCode());
-        assertNotNull(userResponse.getBody());
-        return userResponse.getBody();
+    	
+    	User fetchedUser = userResponse.getBody();
+    	
+        assertNotNull(fetchedUser);
+        
+        System.out.println("USER Successfully FETCHED:" + fetchedUser);
+        
+        return fetchedUser;
     }
-	
-	@Test
+    
+    @Test
     @Order(2)
-    public void testGetUserById() {
-		getUserById(12);
-    }
-    
-    @Test
-    @Order(3)
-    public void testUpdateUser() {
-    	User userToBeUpdated = getUserById(12);
-    	userToBeUpdated.setSalary(userToBeUpdated.getSalary() + 500);
-    	
-    	HttpEntity<User> requestUpdate = new HttpEntity<User>(userToBeUpdated, getHeaders());
-    	
-    	UriComponents uri =UriComponentsBuilder.fromHttpUrl(getRootUrl() + "/users").build();
-    	
-    	ResponseEntity<String> putResponse = restTemplate.exchange(uri.toString(), 
-    			HttpMethod.PUT, 
-    			requestUpdate,
-				String.class);
-    	
-    	assertEquals(HttpStatus.OK, putResponse.getStatusCode());
-        assertNotNull(putResponse.getBody());
-        assertEquals("User with id : 12 updated successfully", putResponse.getBody());
-    }
-    
-    @Test
-    @Order(4)
     public void testDeleteUserById() {
     	deleteUser(14, HttpStatus.NOT_FOUND);
     }
@@ -149,13 +168,13 @@ public class CrudControllerIntegrationTest {
     	
     	if(expected == HttpStatus.NOT_FOUND) {
     		assertTrue(deleteResponse.getBody().toString().contains("No such USER present with id : 14"));
+    		System.out.println("No such USER present with id : 14 ( EXPECTED )");
     	}else {
     		assertEquals("User with id : "+id+" deleted successfully", deleteResponse.getBody());
+    		System.out.println("User with id : "+id+" deleted successfully");
     	}
     }
     
-    @Test
-  	@Order(5)
   	public void testGetAllUsers() {
   		ResponseEntity<List<User>> response = restTemplate.exchange(getRootUrl() + "/users", 
   				HttpMethod.GET, 
@@ -163,6 +182,7 @@ public class CrudControllerIntegrationTest {
   				new ParameterizedTypeReference<List<User>>() {});
   		assertEquals(HttpStatus.OK, response.getStatusCode());
   		List<User> list = response.getBody();
+  		System.out.println("ALL USER Successfully FETCHED");
   		list.forEach(System.out::println);
   		assertNotNull(list);
   		assertTrue(!list.isEmpty());

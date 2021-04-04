@@ -46,13 +46,14 @@ public class CrudServiceController {
 	}
 	
 	@DeleteMapping("/users/{id}")
-	public ResponseEntity<String> delete(@PathVariable(value = "id",required=false) Optional<Integer> id) {
-		if(id.isPresent()) {
-			userService.removeUserById(id.get());
-			return new ResponseEntity<String>("User with id : " + id.get() + " deleted successfully", HttpStatus.OK);
-		}else {
-			userService.removeAllUsers();
-			return new ResponseEntity<String>("All Users has been deleted successfully", HttpStatus.OK);
-		}
+	public ResponseEntity<String> delete(@PathVariable(value = "id") Integer id) {
+		userService.removeUserById(id);
+		return new ResponseEntity<String>("User with id : " + id + " deleted successfully", HttpStatus.OK);
+	}
+	
+	@DeleteMapping("/users")
+	public ResponseEntity<String> delete() {
+		userService.removeAllUsers();
+		return new ResponseEntity<String>("All Users has been deleted successfully", HttpStatus.OK);
 	}
 }
