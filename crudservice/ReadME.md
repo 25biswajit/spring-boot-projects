@@ -1,11 +1,11 @@
 ### Show running Docker Containers
-docker container ps or docker container ls
+docker container ps / docker container ls
 
 ### Stop Existing Docker Container
-docker stop <Container ID>
+docker stop Container_ID_OR_Name
 
 ### Remove Existing Docker Container
-docker rm <Container ID>
+docker rm Container_ID_OR_Name
 
 ### Build Project
 mvn clean install
@@ -34,9 +34,9 @@ docker logs --follow spring-boot-jpa-crud-image
 #### GET http://192.168.99.100:8086/users
 #### GET http://192.168.99.100:8086/users?id=1
 #### GET http://192.168.99.100:8086/users?id=100
-##### POST http://192.168.99.100:8086/users
+#### POST http://192.168.99.100:8086/users
 {"name": "Tejas","address": "Baranashi","salary": 20000,"age": 30}
-##### PUT http://192.168.99.100:8086/users
+#### PUT http://192.168.99.100:8086/users
 {"id": 1, "name": "Tejas","address": "Baranashi","salary": 20000,"age": 30}
-##### DELETE http://192.168.99.100:8086/users/10
-##### DELETE http://192.168.99.100:8086/users
+#### DELETE http://192.168.99.100:8086/users/10
+#### DELETE http://192.168.99.100:8086/users
